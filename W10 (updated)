@@ -1,0 +1,121 @@
+void setup() {
+  size(1350, 450);
+  frameRate(2);
+}
+
+
+void draw() {
+  background(0); 
+  for (int p=0;p<45;p++){
+    float x1 = 30+60*p;
+    float y1 = 5+30*p;
+  //rect(width/2,height/2,x1,y1);
+  //float borderWidth = 15; 
+
+
+
+  float x = width / 2 - x1 / 2;
+  float y = height / 2 - y1 / 2;
+
+  color[] colors = {
+    
+    color(241,217,155),// 绿
+    color(207,163,93),// 黄
+    color(176,15,45), // 蓝
+    color(89,73,76), // 紫
+    color(100,148,170),
+    color(242,232,240) // 橙
+  };
+
+
+  for (int i = 0; i < 4; i++) {
+    //strokeWeight(borderWidth); 
+    // 起终点
+    float startX = 0; 
+    float startY = 0;
+    float endX = 0;
+    float endY = 0;
+    
+    float segmentLength1 = x1 / 6;
+    float segmentLength2 = y1 / 6;
+    
+    /////////////////////////////////////////////////////////
+    if (i == 0) {
+      startX = x;
+      startY = y;
+      endX = x + x1;
+      endY = y;
+      
+      for (int j = 0; j < 6; j++) {
+        float segmentStartX = startX + j * segmentLength1;
+        float segmentStartY = startY;
+        float segmentEndX = startX + (j + 1) * segmentLength1;
+        float segmentEndY = startY;
+
+        // 颜色
+        strokeWeight(5); 
+        strokeJoin(MITER);
+        stroke(colors[int(random( 6))]);
+        line(segmentStartX, segmentStartY, segmentEndX, segmentEndY);
+      }
+    }
+    else if (i == 1) {
+      startX = x + x1;
+      startY = y;
+      endX = x + x1;
+      endY = y + y1;
+      
+      for (int j = 0; j < 6; j++) {
+        float segmentStartX = startX;
+        float segmentStartY = startY + j * segmentLength2;
+        float segmentEndX = startX;
+        float segmentEndY = startY + (j + 1) * segmentLength2;
+
+        // 颜色
+        strokeWeight(15); 
+        strokeJoin(MITER);
+         stroke(colors[int(random( 6))]);
+        line(segmentStartX, segmentStartY, segmentEndX, segmentEndY);
+      }
+    }
+    else if (i == 2) {
+      startX = x + x1;
+      startY = y + y1;
+      endX = x;
+      endY = y + y1;
+      
+      for (int j = 0; j < 6; j++) {
+        float segmentStartX = startX - j * segmentLength1;
+        float segmentStartY = startY;
+        float segmentEndX = startX - (j + 1) * segmentLength1;
+        float segmentEndY = startY;
+
+        //颜色
+        strokeWeight(5); 
+        strokeJoin(MITER);
+        stroke(colors[int(random( 6))]);
+        line(segmentStartX, segmentStartY, segmentEndX, segmentEndY);
+      }
+    } 
+    else if (i == 3) {
+      startX = x;
+      startY = y + y1;
+      endX = x;
+      endY = y;
+
+      for (int j = 0; j < 6; j++) {
+        float segmentStartX = startX;
+        float segmentStartY = startY - j * segmentLength2;
+        float segmentEndX = startX;
+        float segmentEndY = startY - (j + 1) * segmentLength2;
+
+        // 颜色
+        strokeWeight(15); 
+        strokeJoin(MITER);
+        stroke(colors[int(random( 6))]);
+        line(segmentStartX, segmentStartY, segmentEndX, segmentEndY);
+       
+      }}
+    }
+  }
+}
