@@ -1,0 +1,62 @@
+PImage img;
+float maxRadius; 
+float currentRadius; 
+float radiusIncrement; 
+boolean recording = true;
+
+void setup() {
+  size(774, 528);
+  img = loadImage("face.jpg");
+  background(0);
+  frameRate(12);
+  
+  maxRadius= dist(width/2, height/2, 0, 0); // 最大半径
+  currentRadius= 0;
+  radiusIncrement =maxRadius/100; // 半径增量
+}
+
+void draw(){
+
+  if (currentRadius < maxRadius){
+    processImage();
+    currentRadius += radiusIncrement; //半径+
+    if (recording) {
+      saveFrame("output/frame-######.png"); 
+    }
+  }
+  else{
+    noLoop();
+  }
+}
+
+void processImage() {
+  loadPixels();
+  for (int y = 0; y < img.height; y += 12) {
+    for (int x = 0; x < img.width; x += 12) {
+      int loc = x + y * img.width;
+      
+      float r = red(img.pixels[loc]);
+      float g = green(img.pixels[loc]);
+      float b = blue(img.pixels[loc]);
+      
+      //圆心位置
+      float centerX = x;
+      float centerY = y;
+      
+      //////////
+      if (dist(centerX, centerY, width/2, height/2) < currentRadius) {
+        
+       if( ((r+g+b)/3) > 50){
+       fill(img.pixels[loc]);
+       noStroke();
+       circle(x, y, 15);}
+         else{
+         fill(r,g,b);
+         noStroke();
+         circle(x, y, 10);
+       }
+       
+      }
+    }
+  }
+}
