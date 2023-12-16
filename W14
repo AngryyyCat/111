@@ -1,0 +1,241 @@
+ArrayList<Triangle> triangles;
+PVector[][] vp;
+import controlP5.*;
+ControlP5 cp5;
+ColorPicker cp;
+
+float amplitude = 30;
+float fillGap = 2.5;
+
+int c = color(100);
+int heightSection = 3;
+int laySection = 72;
+float radiu = 180; 
+float layerHeight = 20;
+
+float rotateRange = PI;
+float ProbOfShowShape = 1; 
+
+void setup() {
+  size(1200, 1200, P3D);
+  surface.setLocation(50, 50);
+      
+  PImage gradient = createImage(width, height, RGB);
+  float frequency = 0;
+  UI();
+  smooth(200);
+  setSystem();
+}
+
+void setSystem() {
+  initiateModelData(); 
+  buildMesh(vp); 
+
+  for (Triangle t:triangles) {
+    if (random(1) < ProbOfShowShape) {
+      t.drawShape = true;
+    }
+  }
+}
+
+void draw() {
+  background(102);
+  lights();
+  shininess(20);
+  
+  for (Triangle t : triangles) { 
+    t.run();
+  }
+
+cam.beginHUD();
+  slider.draw();
+  textSize(7);
+  fill(255);
+  textAlign(LEFT, TOP);
+  String message = "R\nG\nB\na"; 
+  text(message,20,20); 
+cam.endHUD();
+
+  if ((mouseX<360 && mouseY> 880) || (mouseX < 340 && mouseY <240)) {
+    cam.setActive(false);
+  } else {
+    cam.setActive(true);
+  }
+}
+
+///////
+public void ControlEvent(ControlEvent c) {
+  if(c.isFrom(cp)) {
+    int r = int(c.getArrayValue(0));
+    int g = int(c.getArrayValue(1));
+    int b = int(c.getArrayValue(2));
+    int a = int(c.getArrayValue(3));
+    color col = color(r,g,b,a);
+  }
+}
+               
+void initiateModelData() {
+  vp= new PVector[heightSection][laySection]; 
+  float Dd=30;
+  
+  for (int i = 0; i < vp.length; i ++) {
+    
+    float angSection = TWO_PI/ vp[0].length; 
+    float sectionPhaseAngle = rotateRange / vp.length; 
+    for (int j = 0; j < vp[0].length; j ++) {
+      float reduceheight = sin(j)*5;
+      
+    float xx = (radiu - (float)Math.pow(i, -1) * Dd) * cos(angSection * j + sectionPhaseAngle * i);
+    float yy = (radiu - (float)Math.pow(i, -1) * Dd) * sin(angSection * j + sectionPhaseAngle * i);
+      float zz = layerHeight * i-reduceheight; 
+      vp[i][j] = new PVector(xx, yy, zz);
+    }
+  }
+}
+
+void buildMesh(PVector[][] model) {
+  triangles = new ArrayList<Triangle>();
+
+  for (int i = 0; i < model.length-1; i ++) {
+    for (int j = 0; j < model[0].length; j ++) {
+      PVector p1 = new PVector(model[i][j].x, model[i][j].y, model[i][j].z);
+      PVector p2 = new PVector(model[i+1][j].x, model[i+1][j].y, model[i+1][j].z);
+      PVector p3 = new PVector(model[i][(j+1)%model[0].length].x, 
+                               model[i][(j+1)%model[0].length].y, 
+                               model[i][(j+1)%model[0].length].z);
+      PVector p4 = new PVector(model[i+1][(j+1)%model[0].length].x, 
+                               model[i+1][(j+1)%model[0].length].y, 
+                               model[i+1][(j+1)%model[0].length].z);  
+      triangles.add(new Triangle(p1, p3, p2)); 
+      triangles.add(new Triangle(p2, p3, p4)); 
+
+    }
+  }
+}
+
+
+lass Triangle {
+  PVector[] triVertex;
+  PVector center;
+  boolean drawShape;
+ 
+ 
+  Triangle(PVector p1, PVector p2, PVector p3) {
+    triVertex = new PVector[3];
+    //contourVertex = new PVector[triVertex.length];
+    triVertex[0] = p1;
+    triVertex[1] = p2;
+    triVertex[2] = p3;
+    center = ct();
+  }
+
+  void run() {
+    if (drawShape) {
+        drawTriangle();
+    }
+  }
+  void drawTriangle() {
+    beginShape(TRIANGLE);
+    noStroke();
+    //stroke(0);
+    //strokeWeight(1);
+    fill(cp.getColorValue());
+    for (int i = 0; i < triVertex.length; i ++) {
+      vertex(triVertex[i].x, triVertex[i].y, triVertex[i].z);
+    }
+    endShape();
+  }
+  PVector ct() {
+    float cx = 0;
+    float cy = 0;
+    float cz = 0;
+
+    for (int i = 0; i < triVertex.length; i ++) {
+      cx += triVertex[i].x;
+      cy += triVertex[i].y;
+      cz += triVertex[i].z;
+    }
+
+    cx /= 3.0;
+    cy /= 3.0;
+    cz /= 3.0;
+    PVector cv = new PVector(cx, cy, cz);
+
+    return cv;
+  }
+}
+
+import controlP5.*;
+import peasy.*;
+
+ControlP5 slider;
+PeasyCam cam;
+
+void UI() {
+  int sliderWidth = 300;
+  int sliderHeight = 30;
+
+   cam = new PeasyCam(this, 800);
+ //////颜色
+   cp5 = new ControlP5(this);
+   cp = cp5.addColorPicker("picker")
+          .setPosition(200,340)
+          .setColorValue(color(222, 189, 190, 250));
+
+  slider = new ControlP5(this, createFont("微软雅黑", 24));
+
+  slider.addSlider("heightSection")
+    .setPosition(20,900)
+    .setSize(sliderWidth, sliderHeight)
+    .setRange(3,25)
+    .setValue(10)
+    ;
+
+  slider.addSlider("laySection")
+    .setPosition(20,940)
+    .setSize(sliderWidth, sliderHeight)
+    .setRange(9,48)
+    .setValue(28)
+    ;
+
+  slider.addSlider("layerHeight")
+    .setPosition(20,980)
+    .setSize(sliderWidth, sliderHeight)
+    .setRange(20, 60)
+    .setValue(25)
+    ;
+
+  slider.addSlider("rotateRange")
+    .setPosition(20,1020)
+    .setSize(sliderWidth, sliderHeight)
+    .setRange(0, PI*8)
+    .setValue(0)
+    ;
+
+ slider.addSlider("radiu")
+    .setPosition(20,1060)
+    .setSize(sliderWidth, sliderHeight)
+    .setRange(120, 240)
+    .setValue(150)
+    ;
+
+  slider.addSlider("ProbOfShowShape")
+    .setPosition(20,1100)
+    .setSize(sliderWidth, sliderHeight)
+    .setRange(0, 1)
+    .setValue(1);
+
+  
+  slider.setAutoDraw(false);
+}
+
+void controlEvent(ControlEvent theEvent) {
+  if (theEvent.isFrom(slider.getController("heightSection")) ||
+    theEvent.isFrom(slider.getController("laySection")) ||
+    theEvent.isFrom(slider.getController("layerHeight")) ||
+    theEvent.isFrom(slider.getController("rotateRange")) ||
+    theEvent.isFrom(slider.getController("radiu")) ||
+    theEvent.isFrom(slider.getController("ProbOfShowShape"))) {
+    setSystem();
+  }
+}
