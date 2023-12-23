@@ -1,0 +1,150 @@
+import processing.pdf.*;
+import processing.svg.*;
+
+ArrayList<Agent> agents;
+int totalNum = 2000;
+int order = 0;
+int index = 1;
+PVector centerForce;
+boolean center = false;
+
+void setup() {
+  size(800, 800);
+  initiateCore();
+  colorMode(HSB);
+}
+
+void draw() {
+  background(0);
+  if (index < totalNum) {
+    PVector seeds = PVector.random2D().mult(width/2).add(new PVector(width/2, height/2));
+    agents.add(new Agent(seeds, index));
+    index ++;
+  }
+  for (Agent a : agents) {
+    PVector s = PVector.random2D().mult(4);
+    a.update(s);
+  }
+  fill(255);
+  text(index, 20, 20);
+}
+
+void initiateCore() {
+  agents = new ArrayList<Agent>();
+  agents.add(new Agent(new PVector(width/2, height/2), 0));
+}
+
+void keyPressed() {
+  if (key == 'r') {
+    center = false;
+    agents.clear();
+    order = 0;
+    index = 1;
+    initiateCore();
+  }
+  if (key =='s') {
+    outputSVG();
+  }
+}
+
+void outputSVG() {
+  beginRecord(PDF, "designOutput/drawConnection.pdf"); 
+  for (Agent a : agents) {
+    a.drawConnection();
+  }
+  endRecord();
+}
+
+void mousePressed(){
+  centerForce = new PVector(mouseX, mouseY);
+  agents.get(0).location = centerForce;
+  center = true;
+}
+
+class Agent {
+  PVector location;
+  float diameter = 10;
+  boolean agentTouch;
+  PVector speed;
+
+  int agentIndex;
+  int agentOrder = 0;
+  ArrayList<PVector> pair;
+
+  Agent(PVector loc, int i) {
+    location = loc;
+    agentIndex = i;
+    pair = new ArrayList<PVector>();
+  }
+
+  void update(PVector s) {
+    touch();
+    move(s);
+    show();
+    drawConnection();
+  }
+
+  void move(PVector speed_) {
+    //diameter = 40-agentOrder/10;
+    if (agentTouch) {
+      speed = new PVector(0, 0);
+    } else {
+      speed = speed_;
+      speed.normalize().mult(2);
+      if (center) {
+        speed.add(PVector.sub(centerForce, location).normalize().mult(2));
+      }
+    }
+    location.add(speed);
+  }
+
+  void show() {
+    noStroke();
+    if (agentTouch) {
+      noFill();
+    } else {
+      fill(255);
+    }
+    ellipse(location.x, location.y, diameter, diameter); 
+    fill(0);
+    textAlign(CENTER, CENTER);
+  }
+
+  void touch() {
+    agents.get(0).agentTouch = true;
+
+    for (Agent a : agents) {
+      if (this != a && a.agentTouch && !this.agentTouch) {
+        float dd = PVector.dist(this.location, a.location);
+        if (dd <= (this.diameter+a.diameter)/2) {
+          this.agentTouch = true;
+          //connected.add(this);
+          pair.add(new PVector(this.agentIndex, a.agentIndex));
+          order ++;
+          agentOrder = order + 1;
+        } else {
+          this.agentTouch = false;
+        }
+      }
+    }
+  }
+  
+  void drawConnection() {
+  if (pair != null) {
+    for (PVector p : pair) {
+      float dd = PVector.dist(agents.get((int) p.x).location, agents.get((int) p.y).location);
+      if (dd > 10) {
+        continue;
+      }
+      color c = color(140+(agents.get((int) p.x).location.x -mouseX)/ width * 30, (agents.get((int) p.x).location.x / width) * 150, (agents.get((int) p.y).location.y / height) * 150);
+      stroke(c);
+      float sw = map(agentOrder, 0, agents.size(), diameter, 1);
+      if (sw < 0.5) {
+        sw = 0.5; 
+      }
+      strokeWeight(sw);
+      line(agents.get((int) p.x).location.x, agents.get((int) p.x).location.y, agents.get((int) p.y).location.x, agents.get((int) p.y).location.y);
+    }
+  }
+} 
+}
