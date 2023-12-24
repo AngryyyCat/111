@@ -14,37 +14,47 @@ void setup() {
   colorMode(HSB);
 }
 
-void draw() {
-  background(0);
-  if (index < totalNum) {
-    PVector seeds = PVector.random2D().mult(width/2).add(new PVector(width/2, height/2));
-    agents.add(new Agent(seeds, index));
-    index ++;
-  }
-  for (Agent a : agents) {
-    PVector s = PVector.random2D().mult(4);
-    a.update(s);
-  }
-  fill(255);
-  text(index, 20, 20);
-}
+//void draw() {
+//  background(0);
+  
+//  if (index < totalNum) {
+//    PVector seeds = new PVector(random(width), -10);
+//    agents.add(new Agent(seeds, index));
+//    index++;
+//  }
+  
+//  for (Agent a : agents) {
+//    float vx = 0;
+//    float vy = 1;
+//    PVector s = new PVector(vx, vy); 
+//    a.update(s);
+//  }
+//  fill(255);
+//}
 
 void initiateCore() {
   agents = new ArrayList<Agent>();
   agents.add(new Agent(new PVector(width/2, height/2), 0));
 }
 
-void keyPressed() {
-  if (key == 'r') {
-    center = false;
-    agents.clear();
-    order = 0;
-    index = 1;
-    initiateCore();
+void draw() {
+  background(0);
+  
+  if (index < totalNum) {
+    PVector seeds = new PVector(random(width), -10);
+    agents.add(new Agent(seeds, index));
+    index++;
   }
-  if (key =='s') {
-    outputSVG();
+  
+  for (Agent a : agents) {
+    float vx = random(-1, 1); // 在水平方向上产生随机漂移
+    float vy = random(0.5, 2); // 在垂直方向上产生随机下落速度
+    PVector s = new PVector(vx, vy); 
+    a.update(s);
   }
+  
+  fill(255);
+  text(index, 20, 20);
 }
 
 void outputSVG() {
@@ -61,6 +71,18 @@ void mousePressed(){
   center = true;
 }
 
+void keyPressed() {
+  if (key == 'r') {
+    center = false;
+    agents.clear();
+    order = 0;
+    index = 1;
+    initiateCore();
+  }
+  if (key =='s') {
+    outputSVG();
+  }
+}
 class Agent {
   PVector location;
   float diameter = 10;
@@ -118,7 +140,6 @@ class Agent {
         float dd = PVector.dist(this.location, a.location);
         if (dd <= (this.diameter+a.diameter)/2) {
           this.agentTouch = true;
-          //connected.add(this);
           pair.add(new PVector(this.agentIndex, a.agentIndex));
           order ++;
           agentOrder = order + 1;
