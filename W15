@@ -14,23 +14,6 @@ void setup() {
   colorMode(HSB);
 }
 
-//void draw() {
-//  background(0);
-  
-//  if (index < totalNum) {
-//    PVector seeds = new PVector(random(width), -10);
-//    agents.add(new Agent(seeds, index));
-//    index++;
-//  }
-  
-//  for (Agent a : agents) {
-//    float vx = 0;
-//    float vy = 1;
-//    PVector s = new PVector(vx, vy); 
-//    a.update(s);
-//  }
-//  fill(255);
-//}
 
 void initiateCore() {
   agents = new ArrayList<Agent>();
@@ -47,8 +30,8 @@ void draw() {
   }
   
   for (Agent a : agents) {
-    float vx = random(-1, 1); // 在水平方向上产生随机漂移
-    float vy = random(0.5, 2); // 在垂直方向上产生随机下落速度
+    float vx = random(-1, 1);
+    float vy = random(0.5, 2); 
     PVector s = new PVector(vx, vy); 
     a.update(s);
   }
@@ -107,7 +90,6 @@ class Agent {
   }
 
   void move(PVector speed_) {
-    //diameter = 40-agentOrder/10;
     if (agentTouch) {
       speed = new PVector(0, 0);
     } else {
