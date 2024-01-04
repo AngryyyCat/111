@@ -1,0 +1,114 @@
+import java.util.ArrayList;
+
+boolean generatingFractal;
+int generationDuration = 2000;
+int generationStartTime;
+
+ArrayList<PVector> fractalPoints;
+
+void setup() {
+  size(800, 800);
+  background(0);
+
+  fractalPoints = new ArrayList<>();
+  generatingFractal = false;
+}
+
+void circles() {
+  color c = color(random(255), random(255), random(255));
+  noStroke();
+  fill(c, 60);
+}
+
+void fractal(float x, float y, float n) {
+  if (n == 0) {
+    return;
+  }
+
+  circles();
+  float radius = 2;
+  ellipse(x, y, radius * 2, radius * 2);
+
+//两个球的连线
+  if (fractalPoints.size() > 1) {
+    PVector prevPoint = fractalPoints.get(fractalPoints.size() - 2);
+    color c = color(fractalPoints.size() - 2, 80, 80);
+    colorMode(HSB);
+    stroke(c);
+    line(prevPoint.x, prevPoint.y, x, y);
+  }
+
+  float x1 = x * 0.5 + y * 0.5;
+  float y1 = -x * 0.5 + y * 0.5;
+
+
+  fractalPoints.add(new PVector(x1, y1));
+  fractal(x1, y1, n - 1);
+}
+
+void draw() {
+  if (generatingFractal) {
+    if (millis() - generationStartTime >= generationDuration) {
+      generatingFractal = false;
+    }
+
+    for (int i = 0; i < fractalPoints.size(); i++) {
+      PVector point = fractalPoints.get(i);
+      circles();
+      float radius = 2;
+      ellipse(point.x, point.y, radius * 2, radius * 2);
+
+      if (i > 0) {
+        PVector prevPoint = fractalPoints.get(i - 1);
+
+        color c = color(fractalPoints.size() - 2,80, 80);
+        colorMode(HSB);
+        stroke(c,90);
+        line(prevPoint.x, prevPoint.y, point.x, point.y);
+      }
+    }
+
+
+    int numPoints = fractalPoints.size();
+    for (int i = 0; i < numPoints; i++) {
+      PVector point = fractalPoints.get(i);
+      float x = point.x;
+      float y = point.y;
+
+      for (int j = 0; j < 5; j++) {
+        float angle = random(TWO_PI);
+        float distance = random(50);
+        float newX = x + cos(angle) * distance;
+        float newY = y + sin(angle) * distance;
+        fractalPoints.add(new PVector(newX, newY));
+      }
+    }
+  }
+}
+
+void mousePressed() {
+  generatingFractal = true;
+  generationStartTime = millis();
+
+  float x = mouseX;
+  float y = mouseY;
+
+  if (!fractalPoints.isEmpty()) {
+    PVector lastPoint = fractalPoints.get(fractalPoints.size() - 1);
+    color c = color(fractalPoints.size() - 1, 80, 80);
+    colorMode(HSB);
+    stroke(c);
+    line(lastPoint.x, lastPoint.y, x, y);
+  }
+
+
+  fractalPoints.clear();
+
+  fractalPoints.add(new PVector(x, y));
+}
+
+void keyPressed() {
+  if (key == 's') {
+    saveFrame();
+  }
+}
